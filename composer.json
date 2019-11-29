@@ -1,0 +1,38 @@
+{
+    "name": "zaeder/multidb-bundle",
+    "type": "symfony-bundle",
+    "description": "Symfony MultiDbBundle",
+    "keywords": [
+        "Dynamic database", "database"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Zaeder",
+            "email": "zaeder@live.fr"
+        }
+    ],
+    "require": {
+        "php": "^7.1.3",
+        "ext-openssl": "*",
+        "doctrine/doctrine-bundle" : "^2.0.0",
+        "symfony/framework-bundle" : "^3.0||^4.0",
+        "symfony/proxy-manager-bridge": "^3.0||^4.0"
+    },
+    "config": {
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Zaeder\\MultiDb\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Zaeder\\MultiDb\\Tests\\": "tests/"
+        }
+    }
+}
