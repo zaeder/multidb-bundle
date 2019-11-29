@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaeder\MultiDb\Command;
+namespace Zaeder\MultiDbBundle\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Command\Proxy\DoctrineCommandHelper;
 use Doctrine\Common\Persistence\ManagerRegistry;
@@ -14,23 +14,31 @@ class DatabaseUpdateCommand extends UpdateCommand
 {
     use DoctrineSchemaTrait;
 
-    public function __construct(ManagerRegistry $managerRegistry, EventDispatcherInterface $eventDispatcher, $name = null)
+    public function __construct(
+        ManagerRegistry $managerRegistry,
+        string $localEntityManagerName,
+        string $localConnectionName,
+        string $distEntityManagerName,
+        string $serverEntityClass,
+        EventDispatcherInterface $eventDispatcher,
+        $name = null
+    )
     {
         parent::__construct($name);
-        $this->init($managerRegistry, $eventDispatcher);
+        $this->init($managerRegistry, $localEntityManagerName, $localConnectionName, $distEntityManagerName, $serverEntityClass, $eventDispatcher);
     }
 
     protected function configure()
     {
         parent::configure();
         $this
-            ->setName('app:database:update')
+            ->setName('zaeder:database:update')
             ->addOption('serverkey', null, InputOption::VALUE_REQUIRED, 'The server key set for in table server');
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        DoctrineCommandHelper::setZaeder\MultiDblicationEntityManager($this->getZaeder\MultiDblication(), $this->getEntityManagerName($input->getOption('serverkey')));
+        DoctrineCommandHelper::setApplicationEntityManager($this->getApplication(), $this->getEntityManagerName($input->getOption('serverkey')));
 
         return parent::execute($input, $output);
     }

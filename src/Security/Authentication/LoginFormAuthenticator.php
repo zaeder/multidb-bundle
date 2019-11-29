@@ -1,15 +1,14 @@
 <?php
 
-namespace Zaeder\MultiDb\Security\Authentication;
+namespace Zaeder\MultiDbBundle\Security\Authentication;
 
-use Zaeder\MultiDb\Entity\Dist\DistUser as DistUser;
-use Zaeder\MultiDb\Entity\Local\Server;
-use Zaeder\MultiDb\Entity\Local\User;
-use Zaeder\MultiDb\Event\DatabaseEvents;
-use Zaeder\MultiDb\Event\Event;
-use Zaeder\MultiDb\Event\SecurityEvents;
-use Zaeder\MultiDb\Security\PasswordEncoder;
-use Zaeder\MultiDb\Security\Security;
+use Doctrine\Common\Persistence\ManagerRegistry;
+use Zaeder\MultiDbBundle\Entity\ServerInterface;
+use Zaeder\MultiDbBundle\Event\DatabaseEvents;
+use Zaeder\MultiDbBundle\Event\Event;
+use Zaeder\MultiDbBundle\Event\SecurityEvents;
+use Zaeder\MultiDbBundle\Security\PasswordEncoder;
+use Zaeder\MultiDbBundle\Security\Security;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -42,6 +41,22 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
      */
     private $distEntityManager;
     /**
+     * @var string
+     */
+    private $distUserEntityClass;
+    /**
+     * @var string
+     */
+    private $localUserEntityClass;
+    /**
+     * @var string
+     */
+    private $serverEntityClass;
+    /**
+     * @var array
+     */
+    private $loginRedirect;
+    /**
      * @var UrlGeneratorInterface
      */
     private $urlGenerator;
@@ -60,24 +75,37 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
 
     /**
      * LoginFormAuthenticator constructor.
-     * @param EntityManagerInterface $localEntityManager
-     * @param EntityManagerInterface $distEntityManager
+     * @param ManagerRegistry $registry
+     * @param string $localEntityManagerName
+     * @param string $distEntityManagerName
+     * @param string $distUserEntityClass
+     * @param string $serverEntityClass
+     * @param string $localUserEntityClass
      * @param UrlGeneratorInterface $urlGenerator
      * @param CsrfTokenManagerInterface $csrfTokenManager
      * @param PasswordEncoder $passwordEncoder
      * @param EventDispatcherInterface $eventDispatcher
      */
     public function __construct(
-        EntityManagerInterface $localEntityManager,
-        EntityManagerInterface $distEntityManager,
+        ManagerRegistry $registry,
+        string $localEntityManagerName,
+        string $distEntityManagerName,
+        string $distUserEntityClass,
+        string $localUserEntityClass,
+        string $serverEntityClass,
+        array $loginRedirect,
         UrlGeneratorInterface $urlGenerator,
         CsrfTokenManagerInterface $csrfTokenManager,
         PasswordEncoder $passwordEncoder,
         EventDispatcherInterface $eventDispatcher
     )
     {
-        $this->localEntityManager = $localEntityManager;
-        $this->distEntityManager = $distEntityManager;
+        $this->localEntityManager = $registry->getManager($localEntityManagerName);
+        $this->distEntityManager = $registry->getManager($distEntityManagerName);
+        $this->distUserEntityClass = $distUserEntityClass;
+        $this->localUserEntityClass = $localUserEntityClass;
+        $this->serverEntityClass = $serverEntityClass;
+        $this->loginRedirect = $loginRedirect;
         $this->urlGenerator = $urlGenerator;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->passwordEncoder = $passwordEncoder;
@@ -131,15 +159,15 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         }
 
         if (!empty($credentials['serverkey'])) {
-            $server = $this->localEntityManager->getRepository(Server::class)->findOneBy(['key' => $credentials['serverkey'], 'isActive' => true]);
+            $server = $this->localEntityManager->getRepository($this->serverEntityClass)->findOneBy(['key' => $credentials['serverkey'], 'isActive' => true]);
 
-            if (!$server instanceof Server) {
+            if (!$server instanceof ServerInterface) {
                 throw new CustomUserMessageAuthenticationException('Server key could not be found.');
             }
 
             $this->eventDispatcher->dispatch(new Event($server), DatabaseEvents::DIST_EM_CONFIG);
 
-            $distUser = $this->distEntityManager->getRepository(DistUser::class)->findOneBy(['username' => $credentials['username'], 'isActive' => true]);
+            $distUser = $this->distEntityManager->getRepository($this->distUserEntityClass)->findOneBy(['username' => $credentials['username'], 'isActive' => true]);
 
             if (!$distUser) {
                 // fail authentication with a custom error
@@ -156,7 +184,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
             $this->eventDispatcher->dispatch(new Event($data), SecurityEvents::SECURITY_IMPORT_DIST_USER);
         }
 
-        $user = $this->localEntityManager->getRepository(User::class)->findOneBy(['username' => $credentials['username']]);
+        $user = $this->localEntityManager->getRepository($this->localUserEntityClass)->findOneBy(['username' => $credentials['username']]);
 
         if (!$user) {
             // fail authentication with a custom error
@@ -181,15 +209,18 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
      * @param TokenInterface $token
      * @param string $providerKey
      * @return RedirectResponse
+     * @throws \Exception
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
-        // Redirect to administration panel for admin user
-        if (in_array('ROLE_ADMIN', $token->getUser()->getRoles())) {
-            return new RedirectResponse($this->urlGenerator->generate('home_admin'));
+        $userRoles = $token->getUser()->getRoles();
+        foreach ($this->loginRedirect as $role => $route) {
+            if (in_array($role, $userRoles)) {
+                return new RedirectResponse($this->urlGenerator->generate($route));
+            }
         }
 
-        return new RedirectResponse($this->urlGenerator->generate('home'));
+        throw new \Exception('loginRedirect option is not define for current user role');
     }
 
     /**

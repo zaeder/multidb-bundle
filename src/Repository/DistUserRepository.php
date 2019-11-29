@@ -1,8 +1,8 @@
 <?php
 
-namespace Zaeder\MultiDb\Repository;
+namespace Zaeder\MultiDbBundle\Repository;
 
-use Zaeder\MultiDb\Entity\DistUserInterface;
+use Zaeder\MultiDbBundle\Entity\DistUserInterface;
 use Doctrine\ORM\EntityRepository;
 
 /**

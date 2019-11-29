@@ -1,9 +1,10 @@
 <?php
 
-namespace Zaeder\MultiDb\Command;
+namespace Zaeder\MultiDbBundle\Command;
 
-use Zaeder\MultiDb\Entity\Local\User;
-use Zaeder\MultiDb\Security\PasswordEncoder;
+use Doctrine\Common\Persistence\ManagerRegistry;
+use Zaeder\MultiDbBundle\Entity\Local\User;
+use Zaeder\MultiDbBundle\Security\PasswordEncoder;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -31,12 +32,17 @@ class CreateAdminCommand extends Command
 
     /**
      * CreateAdminCommand constructor.
-     * @param EntityManagerInterface $localEntityManager
+     * @param ManagerRegistry $registry
+     * @param string $localEntityManagerName
      * @param PasswordEncoder $encoder
      */
-    public function __construct(EntityManagerInterface $localEntityManager, PasswordEncoder $encoder)
+    public function __construct(
+        ManagerRegistry $registry,
+        string $localEntityManagerName,
+        PasswordEncoder $encoder
+    )
     {
-        $this->localEntityManager = $localEntityManager;
+        $this->localEntityManager = $registry->getManager($localEntityManagerName);
         $this->encoder = $encoder;
 
         parent::__construct();

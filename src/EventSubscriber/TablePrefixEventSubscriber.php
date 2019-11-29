@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaeder\MultiDb\EventSubscriber;
+namespace Zaeder\MultiDbBundle\EventSubscriber;
 
 use Doctrine\Common\EventSubscriber;
 use \Doctrine\ORM\Event\LoadClassMetadataEventArgs;
@@ -18,9 +18,9 @@ class TablePrefixEventSubscriber implements EventSubscriber
 
     /**
      * TablePrefixEventSubscriber constructor.
-     * @param string $prefix
+     * @param string|null $prefix
      */
-    public function __construct(string $prefix)
+    public function __construct(?string $prefix)
     {
         $this->prefix = $prefix;
     }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Zaeder\MultiDb\Form;
+namespace Zaeder\MultiDbBundle\Form;
 
-use Zaeder\MultiDb\Entity\Local\User;
+use Zaeder\MultiDbBundle\Entity\Local\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;

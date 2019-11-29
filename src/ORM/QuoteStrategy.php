@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaeder\MultiDb\ORM;
+namespace Zaeder\MultiDbBundle\ORM;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\ORM\Mapping\ClassMetadata;

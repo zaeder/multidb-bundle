@@ -1,10 +1,10 @@
 <?php
 
-namespace Zaeder\MultiDb\Repository\Local;
+namespace Zaeder\MultiDbBundle\Repository;
 
-use Zaeder\MultiDb\Entity\DistUserInterface;
-use Zaeder\MultiDb\Entity\LocalUserInterface;
-use Zaeder\MultiDb\Entity\ServerInterface;
+use Zaeder\MultiDbBundle\Entity\DistUserInterface;
+use Zaeder\MultiDbBundle\Entity\LocalUserInterface;
+use Zaeder\MultiDbBundle\Entity\ServerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 

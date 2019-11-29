@@ -27,12 +27,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Zaeder\\MultiDb\\": "src/"
+            "Zaeder\\MultiDbBundle\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Zaeder\\MultiDb\\Tests\\": "tests/"
+            "Zaeder\\MultiDbBundle\\Tests\\": "tests/"
         }
     }
 }

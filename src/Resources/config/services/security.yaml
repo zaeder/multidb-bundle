@@ -1,0 +1,20 @@
+services:
+  Zaeder\MultiDbBundle\Security\:
+    resource: '../../../Security/'
+    autoconfigure: true
+    autowire: true
+
+  Zaeder\MultiDbBundle\Security\Authentication\LoginFormAuthenticator:
+    autoconfigure: true
+    autowire: true
+    arguments:
+      $localEntityManagerName: '%zaeder.multidb.local.entity_manager.name%'
+      $distEntityManagerName: '%zaeder.multidb.dist.entity_manager.name%'
+      $distUserEntityClass: '%zaeder.multidb.dist.user_entity.class%'
+      $localUserEntityClass: '%zaeder.multidb.local.user_entity.class%'
+      $serverEntityClass: '%zaeder.multidb.local.server_entity.class%'
+      $loginRedirect: '%zaeder.multidb.login_redirect%'
+
+  Zaeder\MultiDbBundle\Security\PasswordEncoder:
+    arguments:
+      $passwordKey: '%zaeder.multidb.password_key%'

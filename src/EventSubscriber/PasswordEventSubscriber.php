@@ -1,10 +1,10 @@
 <?php
 
-namespace Zaeder\MultiDb\EventSubscriber;
+namespace Zaeder\MultiDbBundle\EventSubscriber;
 
-use Zaeder\MultiDb\Entity\Dist\DistUser as DistUser;
-use Zaeder\MultiDb\Entity\Local\Server;
-use Zaeder\MultiDb\Security\PasswordEncoder;
+use Zaeder\MultiDbBundle\Entity\DistUserInterface;
+use Zaeder\MultiDbBundle\Entity\ServerInterface;
+use Zaeder\MultiDbBundle\Security\PasswordEncoder;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -64,7 +64,7 @@ class PasswordEventSubscriber implements EventSubscriberInterface
     {
         $entity = $args->getObject();
 
-        if ($entity instanceof DistUser || $entity instanceof Server) {
+        if ($entity instanceof DistUserInterface || $entity instanceof ServerInterface) {
             $entity->setPassword($this->encoder->encode($entity->getPassword()));
             $entity->setSalt($this->encoder->getIv());
         }

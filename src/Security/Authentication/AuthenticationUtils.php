@@ -1,8 +1,8 @@
 <?php
 
-namespace Zaeder\MultiDb\Security\Authentication;
+namespace Zaeder\MultiDbBundle\Security\Authentication;
 
-use Zaeder\MultiDb\Security\Security;
+use Zaeder\MultiDbBundle\Security\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils as SymfonyAuthenticationUtils;

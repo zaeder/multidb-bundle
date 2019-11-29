@@ -1,0 +1,5 @@
+services:
+  Zaeder\MultiDbBundle\Repository\:
+    resource: '../../../Repository/'
+    autoconfigure: true
+    autowire: true

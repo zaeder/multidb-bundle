@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaeder\MultiDb\Event;
+namespace Zaeder\MultiDbBundle\Event;
 
 class DatabaseEvents
 {

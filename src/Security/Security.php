@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaeder\MultiDb\Security;
+namespace Zaeder\MultiDbBundle\Security;
 
 use Symfony\Component\Security\Core\Security as SymfonySecurity;
 

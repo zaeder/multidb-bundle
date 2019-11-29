@@ -1,14 +1,16 @@
 <?php
 
-namespace Zaeder\MultiDb\EventSubscriber;
+namespace Zaeder\MultiDbBundle\EventSubscriber;
 
 
-use Zaeder\MultiDb\Entity\Local\Server;
-use Zaeder\MultiDb\Entity\Local\User;
-use Zaeder\MultiDb\Event\DatabaseEvents;
-use Zaeder\MultiDb\Event\Event;
-use Zaeder\MultiDb\Event\SecurityEvents;
-use Zaeder\MultiDb\Security\PasswordEncoder;
+use Doctrine\ORM\EntityManager;
+use Psr\Log\LoggerInterface;
+use Zaeder\MultiDbBundle\Entity\LocalUserInterface;
+use Zaeder\MultiDbBundle\Entity\ServerInterface;
+use Zaeder\MultiDbBundle\Event\DatabaseEvents;
+use Zaeder\MultiDbBundle\Event\Event;
+use Zaeder\MultiDbBundle\Event\SecurityEvents;
+use Zaeder\MultiDbBundle\Security\PasswordEncoder;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -28,7 +30,23 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
     /**
      * @var ManagerRegistry
      */
-    protected $managerRegistry;
+    protected $registry;
+    /**
+     * @var string
+     */
+    protected $localEntityManagerName;
+    /**
+     * @var string
+     */
+    protected $distConnectionName;
+    /**
+     * @var string
+     */
+    protected $distEntityManagerName;
+    /**
+     * @var string
+     */
+    protected $localUserEntityClass;
     /**
      * @var PasswordEncoder
      */
@@ -52,7 +70,11 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
 
     /**
      * DistDatabaseEventSubscriber constructor.
-     * @param ManagerRegistry $managerRegistry
+     * @param ManagerRegistry $registry
+     * @param string $localEntityManagerName
+     * @param string $distConnectionName
+     * @param string $distEntityManagerName
+     * @param string $localUserEntityClass
      * @param PasswordEncoder $encoder
      * @param TokenStorageInterface $tokenStorage
      * @param EventDispatcherInterface $eventDispatcher
@@ -60,7 +82,11 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
      * @param RouterInterface $router
      */
     public function __construct(
-        ManagerRegistry $managerRegistry,
+        ManagerRegistry $registry,
+        string $localEntityManagerName,
+        string $distConnectionName,
+        string $distEntityManagerName,
+        string $localUserEntityClass,
         PasswordEncoder $encoder,
         TokenStorageInterface $tokenStorage,
         EventDispatcherInterface $eventDispatcher,
@@ -68,7 +94,11 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
         RouterInterface $router
     )
     {
-        $this->managerRegistry = $managerRegistry;
+        $this->registry = $registry;
+        $this->localEntityManagerName = $localEntityManagerName;
+        $this->distConnectionName = $distConnectionName;
+        $this->distEntityManagerName = $distEntityManagerName;
+        $this->localUserEntityClass = $localUserEntityClass;
         $this->encoder = $encoder;
         $this->tokenStorage = $tokenStorage;
         $this->eventDispatcher = $eventDispatcher;
@@ -94,8 +124,8 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
     public function configure(Event $event)
     {
         $server = $event->getData();
-        if (!$server instanceof Server) {
-            return;
+        if (!$server instanceof ServerInterface) {
+            throw new \Exception('server not valid for configuration');
         }
 
         $this->doConfigure($server);
@@ -112,18 +142,18 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
         if ($token instanceof TokenInterface) {
             $user = $token->getUser();
             // If user exists
-            if ($user instanceof User) {
+            if ($user instanceof LocalUserInterface) {
                 $username = $user->getUsername();
                 $server = $user->getServer();
                 // If user is attached to a server
-                if ($server instanceof Server) {
+                if ($server instanceof ServerInterface) {
                     // Configure dist connection
                     $this->doConfigure($server);
                     // Check user validity
                     $this->eventDispatcher->dispatch(new Event($user), SecurityEvents::SECURITY_VALIDATE_DIST_USER);
                     // Check if current user exists after check up; if no kill session and redirect to login page
-                    $user = $this->managerRegistry->getManager('local')->getRepository(User::class)->findOneBy(['username' => $username, 'server' => $server]);
-                    if (!$user instanceof User) {
+                    $user = $this->registry->getManager($this->localEntityManagerName)->getRepository($this->localUserEntityClass)->findOneBy(['username' => $username, 'server' => $server]);
+                    if (!$user instanceof LocalUserInterface) {
                         $this->tokenStorage->setToken(null);
                         $this->session->invalidate();
                         header('location:'.$this->router->generate('login'));
@@ -136,14 +166,14 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
 
     /**
      * Configure dist connection using server info
-     * @param Server $server
+     * @param ServerInterface $server
      */
-    private function doConfigure(Server $server)
+    private function doConfigure(ServerInterface $server)
     {
         //establish the connection
-        $connection = $this->managerRegistry->getConnection('dist');
+        $connection = $this->registry->getConnection($this->distConnectionName);
 
-        $this->managerRegistry->getManager('dist')->flush();
+        $this->registry->getManager($this->distEntityManagerName)->flush();
 
         if ($connection->isConnected()) {
             $connection->close();
@@ -163,6 +193,6 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
         $refParams->setAccessible('private');
         $refParams->setValue($connection, $params);
 
-        $this->managerRegistry->resetManager('dist');
+        $this->registry->resetManager($this->distEntityManagerName);
     }
 }

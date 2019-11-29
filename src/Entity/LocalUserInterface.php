@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaeder\MultiDb\Entity;
+namespace Zaeder\MultiDbBundle\Entity;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 
