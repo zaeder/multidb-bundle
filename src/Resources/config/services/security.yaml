@@ -14,6 +14,7 @@ services:
       $localUserEntityClass: '%zaeder.multidb.local.user_entity.class%'
       $serverEntityClass: '%zaeder.multidb.local.server_entity.class%'
       $loginRedirect: '%zaeder.multidb.login_redirect%'
+      $loginCheckEncodedPassword: '%zaeder.multidb.login_check_encoded_password%'
 
   Zaeder\MultiDbBundle\Security\PasswordEncoder:
     arguments:

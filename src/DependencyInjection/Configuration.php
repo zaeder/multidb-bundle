@@ -5,6 +5,8 @@ namespace Zaeder\MultiDbBundle\DependencyInjection;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Zaeder\MultiDbBundle\Entity\DistUserInterface;
+use Zaeder\MultiDbBundle\Entity\ServerInterface;
 
 class Configuration implements ConfigurationInterface
 {
@@ -47,6 +49,10 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
                     ->end()
+                ->end()
+                ->append($this->getEntitiesEnablePasswordEncode())
+                ->booleanNode('loginCheckEncodedPassword')
+                    ->defaultValue(false)
                 ->end()
             ->end()
         ->end();
@@ -130,6 +136,31 @@ class Configuration implements ConfigurationInterface
                 ->end()
             ->end()
         ->end();
+
+        return $rootNode;
+    }
+
+    public function getEntitiesEnablePasswordEncode()
+    {
+        $treeBuilder = new TreeBuilder('entities');
+
+        if (method_exists($treeBuilder, 'getRootNode')) {
+            /** @var ArrayNodeDefinition $rootNode */
+            $rootNode = $treeBuilder->getRootNode();
+        } else {
+            // BC layer for symfony/config 4.1 and older
+            /** @var ArrayNodeDefinition $rootNode */
+            $rootNode = $treeBuilder->root('entities');
+        }
+
+        $rootNode
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->arrayNode('enablePasswordEncode')
+                    ->prototype('scalar')->end()
+                    ->defaultValue([ServerInterface::class, DistUserInterface::class])
+                ->end()
+            ->end();
 
         return $rootNode;
     }

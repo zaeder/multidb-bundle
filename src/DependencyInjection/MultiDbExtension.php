@@ -30,6 +30,8 @@ class MultiDbExtension extends Extension
         $container->setParameter('zaeder.multidb.dist.user_entity.class', $config['dist']['userEntity']);
         $container->setParameter('zaeder.multidb.password_key', $config['passwordKey']);
         $container->setParameter('zaeder.multidb.login_redirect', $this->formatLoginRedirect($config['loginRedirect']));
+        $container->setParameter('zaeder.multidb.entities.enable.password_encode', $config['entities']['enablePasswordEncode']);
+        $container->setParameter('zaeder.multidb.login_check_encoded_password', $config['loginCheckEncodedPassword']);
 
         $fileLocator = new FileLocator(__DIR__ . '/../Resources/config/services');
         $yamlLoader = new YamlFileLoader(

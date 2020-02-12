@@ -74,6 +74,11 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
     private $eventDispatcher;
 
     /**
+     * @var bool
+     */
+    private $loginCheckEncodedPassword;
+
+    /**
      * LoginFormAuthenticator constructor.
      * @param ManagerRegistry $registry
      * @param string $localEntityManagerName
@@ -97,7 +102,8 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         UrlGeneratorInterface $urlGenerator,
         CsrfTokenManagerInterface $csrfTokenManager,
         PasswordEncoder $passwordEncoder,
-        EventDispatcherInterface $eventDispatcher
+        EventDispatcherInterface $eventDispatcher,
+        bool $loginCheckEncodedPassword
     )
     {
         $this->localEntityManager = $registry->getManager($localEntityManagerName);
@@ -110,6 +116,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         $this->csrfTokenManager = $csrfTokenManager;
         $this->passwordEncoder = $passwordEncoder;
         $this->eventDispatcher = $eventDispatcher;
+        $this->loginCheckEncodedPassword = $loginCheckEncodedPassword;
     }
 
     /**
@@ -201,7 +208,12 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
      */
     public function checkCredentials($credentials, UserInterface $user)
     {
-        return $this->passwordEncoder->isEquals($user->getPassword(), $user->getSalt(), $credentials['password']);
+        if ($this->loginCheckEncodedPassword) {
+            $valid = $this->passwordEncoder->isEquals($user->getPassword(), $user->getSalt(), $credentials['password']);
+        } else{
+            $valid = $user->getPassword() === $credentials['password'];
+        }
+        return $valid;
     }
 
     /**

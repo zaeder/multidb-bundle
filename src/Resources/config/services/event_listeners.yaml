@@ -1,0 +1,8 @@
+services:
+  Zaeder\MultiDbBundle\EventListener\PasswordEventListener:
+    autoconfigure: true
+    arguments:
+      $entitiesEnabled: '%zaeder.multidb.entities.enable.password_encode%'
+    tags:
+      - {name: doctrine.event_listener, event: prePersist}
+      - {name: doctrine.event_listener, event: preUpdate}
