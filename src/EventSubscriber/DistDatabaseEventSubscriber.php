@@ -8,7 +8,7 @@ use Psr\Log\LoggerInterface;
 use Zaeder\MultiDbBundle\Entity\LocalUserInterface;
 use Zaeder\MultiDbBundle\Entity\ServerInterface;
 use Zaeder\MultiDbBundle\Event\DatabaseEvents;
-use Zaeder\MultiDbBundle\Event\Event;
+use Zaeder\MultiDbBundle\Event\MultiDbEvent;
 use Zaeder\MultiDbBundle\Event\SecurityEvents;
 use Zaeder\MultiDbBundle\Security\PasswordEncoder;
 use Doctrine\Common\Persistence\ManagerRegistry;
@@ -119,9 +119,9 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
 
     /**
      * Configure dist connection on authentication
-     * @param Event $event
+     * @param MultiDbEvent $event
      */
-    public function configure(Event $event)
+    public function configure(MultiDbEvent $event)
     {
         $server = $event->getData();
         if (!$server instanceof ServerInterface) {
@@ -150,7 +150,7 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
                     // Configure dist connection
                     $this->doConfigure($server);
                     // Check user validity
-                    $this->eventDispatcher->dispatch(new Event($user), SecurityEvents::SECURITY_VALIDATE_DIST_USER);
+                    $this->eventDispatcher->dispatch(new MultiDbEvent($user), SecurityEvents::SECURITY_VALIDATE_DIST_USER);
                     // Check if current user exists after check up; if no kill session and redirect to login page
                     $user = $this->registry->getManager($this->localEntityManagerName)->getRepository($this->localUserEntityClass)->findOneBy(['username' => $username, 'server' => $server]);
                     if (!$user instanceof LocalUserInterface) {
@@ -184,7 +184,7 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
         $refParams->setAccessible('public'); //we have to change it for a moment
 
         $params = $refParams->getValue($connection);
-        $params['driver'] = 'pdo_mysql';
+        $params['driver'] = $server->getDriver();
         $params['dbname'] = $server->getDbname();
         $params['user'] = $server->getUsername();
         $params['password'] = $this->encoder->decode($server->getPassword(), $server->getSalt());

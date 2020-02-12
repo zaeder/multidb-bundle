@@ -2,8 +2,9 @@
 
 namespace Zaeder\MultiDbBundle\Event;
 
+use Symfony\Component\EventDispatcher\Event;
 
-class Event
+class MultiDbEvent extends Event
 {
     private $data;
 

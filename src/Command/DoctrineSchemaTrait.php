@@ -7,7 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Zaeder\MultiDbBundle\Entity\ServerInterface;
 use Zaeder\MultiDbBundle\Event\DatabaseEvents;
-use Zaeder\MultiDbBundle\Event\Event;
+use Zaeder\MultiDbBundle\Event\MultiDbEvent;
 
 trait DoctrineSchemaTrait
 {
@@ -49,7 +49,7 @@ trait DoctrineSchemaTrait
                 throw new \Exception('Server can not be found');
             }
             $name = $this->distEntityManagerName;
-            $this->eventDispatcher->dispatch(new Event($server), DatabaseEvents::DIST_EM_CONFIG);
+            $this->eventDispatcher->dispatch(new MultiDbEvent($server), DatabaseEvents::DIST_EM_CONFIG);
         }
         return $name;
     }

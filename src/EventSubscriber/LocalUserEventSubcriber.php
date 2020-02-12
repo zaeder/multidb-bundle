@@ -6,7 +6,7 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 use Zaeder\MultiDbBundle\Entity\DistUserInterface;
 use Zaeder\MultiDbBundle\Entity\LocalUserInterface;
 use Zaeder\MultiDbBundle\Entity\ServerInterface;
-use Zaeder\MultiDbBundle\Event\Event;
+use Zaeder\MultiDbBundle\Event\MultiDbEvent;
 use Zaeder\MultiDbBundle\Event\SecurityEvents;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -70,11 +70,11 @@ class LocalUserEventSubcriber implements EventSubscriberInterface
 
     /**
      * Import dist user in local database
-     * @param Event $event
+     * @param MultiDbEvent $event
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function import(Event $event)
+    public function import(MultiDbEvent $event)
     {
         $data = $event->getData();
         if ($data instanceof \stdClass && isset($data->user) && $data->user instanceof DistUserInterface && isset($data->server) && $data->server instanceof Server) {
@@ -87,9 +87,9 @@ class LocalUserEventSubcriber implements EventSubscriberInterface
 
     /**
      * Check if local user already exists in dist database
-     * @param Event $event
+     * @param MultiDbEvent $event
      */
-    public function validate(Event $event)
+    public function validate(MultiDbEvent $event)
     {
         $data = $event->getData();
         if ($data instanceof LocalUserInterface) {
@@ -104,9 +104,9 @@ class LocalUserEventSubcriber implements EventSubscriberInterface
 
     /**
      * Remove local user if it is the good event data
-     * @param Event $event
+     * @param MultiDbEvent $event
      */
-    public function remove(Event $event)
+    public function remove(MultiDbEvent $event)
     {
         $data = $event->getData();
         if ($data instanceof \stdClass && isset($data->username) && !empty($data->username) && isset($data->server) && $data->server instanceof Server) {

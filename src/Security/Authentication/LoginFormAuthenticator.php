@@ -5,7 +5,7 @@ namespace Zaeder\MultiDbBundle\Security\Authentication;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Zaeder\MultiDbBundle\Entity\ServerInterface;
 use Zaeder\MultiDbBundle\Event\DatabaseEvents;
-use Zaeder\MultiDbBundle\Event\Event;
+use Zaeder\MultiDbBundle\Event\MultiDbEvent;
 use Zaeder\MultiDbBundle\Event\SecurityEvents;
 use Zaeder\MultiDbBundle\Security\PasswordEncoder;
 use Zaeder\MultiDbBundle\Security\Security;
@@ -165,7 +165,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
                 throw new CustomUserMessageAuthenticationException('Server key could not be found.');
             }
 
-            $this->eventDispatcher->dispatch(new Event($server), DatabaseEvents::DIST_EM_CONFIG);
+            $this->eventDispatcher->dispatch(new MultiDbEvent($server), DatabaseEvents::DIST_EM_CONFIG);
 
             $distUser = $this->distEntityManager->getRepository($this->distUserEntityClass)->findOneBy(['username' => $credentials['username'], 'isActive' => true]);
 
@@ -174,14 +174,14 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
                 $data = new \stdClass();
                 $data->username = $credentials['username'];
                 $data->server = $server;
-                $this->eventDispatcher->dispatch(new Event($data), SecurityEvents::SECURITY_REMOVE_DIST_USER);
+                $this->eventDispatcher->dispatch(new MultiDbEvent($data), SecurityEvents::SECURITY_REMOVE_DIST_USER);
                 throw new CustomUserMessageAuthenticationException('Username could not be found.');
             }
 
             $data = new \stdClass();
             $data->user = $distUser;
             $data->server = $server;
-            $this->eventDispatcher->dispatch(new Event($data), SecurityEvents::SECURITY_IMPORT_DIST_USER);
+            $this->eventDispatcher->dispatch(new MultiDbEvent($data), SecurityEvents::SECURITY_IMPORT_DIST_USER);
         }
 
         $user = $this->localEntityManager->getRepository($this->localUserEntityClass)->findOneBy(['username' => $credentials['username']]);
