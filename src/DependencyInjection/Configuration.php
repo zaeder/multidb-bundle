@@ -52,7 +52,7 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->append($this->getEntitiesEnablePasswordEncode())
                 ->booleanNode('loginCheckEncodedPassword')
-                    ->defaultValue(false)
+                    ->defaultValue(true)
                 ->end()
             ->end()
         ->end();
