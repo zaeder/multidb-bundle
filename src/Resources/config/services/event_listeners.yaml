@@ -1,6 +1,7 @@
 services:
   Zaeder\MultiDbBundle\EventListener\PasswordEventListener:
     autoconfigure: true
+    autowire: true
     arguments:
       $entitiesEnabled: '%zaeder.multidb.entities.enable.password_encode%'
     tags:
