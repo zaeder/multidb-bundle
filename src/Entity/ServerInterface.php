@@ -31,27 +31,27 @@ interface ServerInterface
         '4D' => self::DRIVER_PDO_4D,
     ];
 
-    public function getId(): int;
-    public function getKey(): string;
+    public function getId();
+    public function getKey();
     public function setKey(string $key);
-    public function getDriver(): string;
+    public function getDriver();
     public function setDriver(string $driver);
-    public function getHost(): string;
+    public function getHost();
     public function setHost(string $host);
-    public function getPort(): int;
+    public function getPort();
     public function setPort(int $port);
-    public function getDbname(): string;
+    public function getDbname();
     public function setDbname(string $dbname);
-    public function getUsername(): string;
+    public function getUsername();
     public function setUsername(string $username);
-    public function getPassword(): string;
+    public function getPassword();
     public function setPassword(string $password);
-    public function getSalt(): string;
+    public function getSalt();
     public function setSalt(string $salt);
-    public function getRecoveryEmail(): string;
+    public function getRecoveryEmail();
     public function setRecoveryEmail(string $recoveryEmail);
-    public function getIsDist(): bool;
+    public function getIsDist();
     public function setIsDist(bool $isDist);
-    public function getIsActive(): bool;
+    public function getIsActive();
     public function setIsActive(bool $isActive);
 }
