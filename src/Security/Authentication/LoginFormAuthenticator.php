@@ -35,48 +35,48 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
     /**
      * @var EntityManagerInterface
      */
-    private $localEntityManager;
+    protected $localEntityManager;
     /**
      * @var EntityManagerInterface
      */
-    private $distEntityManager;
+    protected $distEntityManager;
     /**
      * @var string
      */
-    private $distUserEntityClass;
+    protected $distUserEntityClass;
     /**
      * @var string
      */
-    private $localUserEntityClass;
+    protected $localUserEntityClass;
     /**
      * @var string
      */
-    private $serverEntityClass;
+    protected $serverEntityClass;
     /**
      * @var array
      */
-    private $loginRedirect;
+    protected $loginRedirect;
     /**
      * @var UrlGeneratorInterface
      */
-    private $urlGenerator;
+    protected $urlGenerator;
     /**
      * @var CsrfTokenManagerInterface
      */
-    private $csrfTokenManager;
+    protected $csrfTokenManager;
     /**
      * @var PasswordEncoder
      */
-    private $passwordEncoder;
+    protected $passwordEncoder;
     /**
      * @var EventDispatcherInterface
      */
-    private $eventDispatcher;
+    protected $eventDispatcher;
 
     /**
      * @var bool
      */
-    private $loginCheckEncodedPassword;
+    protected $loginCheckEncodedPassword;
 
     /**
      * LoginFormAuthenticator constructor.
