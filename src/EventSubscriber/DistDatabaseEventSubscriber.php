@@ -168,7 +168,7 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
      * Configure dist connection using server info
      * @param ServerInterface $server
      */
-    private function doConfigure(ServerInterface $server)
+    protected function doConfigure(ServerInterface $server)
     {
         //establish the connection
         $connection = $this->registry->getConnection($this->distConnectionName);
@@ -190,7 +190,7 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
         $params['password'] = $this->encoder->decode($server->getPassword(), $server->getSalt());
         $params['host'] = $server->getHost();
 
-        $refParams->setAccessible('private');
+        $refParams->setAccessible('protected');
         $refParams->setValue($connection, $params);
 
         $this->registry->resetManager($this->distEntityManagerName);

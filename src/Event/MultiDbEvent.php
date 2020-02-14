@@ -6,7 +6,7 @@ use Symfony\Component\EventDispatcher\Event;
 
 class MultiDbEvent extends Event
 {
-    private $data;
+    protected $data;
 
     public function __construct($data)
     {

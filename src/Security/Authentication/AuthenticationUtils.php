@@ -16,7 +16,7 @@ class AuthenticationUtils extends SymfonyAuthenticationUtils
     /**
      * @var RequestStack
      */
-    private $requestStack;
+    protected $requestStack;
 
     /**
      * AuthenticationUtils constructor.
@@ -48,7 +48,7 @@ class AuthenticationUtils extends SymfonyAuthenticationUtils
     /**
      * @throws \LogicException
      */
-    private function getRequest(): Request
+    protected function getRequest(): Request
     {
         $request = $this->requestStack->getCurrentRequest();
 

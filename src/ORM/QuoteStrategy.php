@@ -18,7 +18,7 @@ class QuoteStrategy implements QuoteStrategyInterface
      * @param AbstractPlatform $platform
      * @return string
      */
-    private function quote($token, AbstractPlatform $platform)
+    protected function quote($token, AbstractPlatform $platform)
     {
         switch ($platform->getName()) {
             case 'mysql':

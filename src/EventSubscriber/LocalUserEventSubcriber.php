@@ -20,19 +20,19 @@ class LocalUserEventSubcriber implements EventSubscriberInterface
     /**
      * @var EntityManagerInterface
      */
-    private $localEntityManager;
+    protected $localEntityManager;
     /**
      * @var EntityManagerInterface
      */
-    private $distEntityManager;
+    protected $distEntityManager;
     /**
      * @var string
      */
-    private $localUserEntityClass;
+    protected $localUserEntityClass;
     /**
      * @var string
      */
-    private $distUserEntityClass;
+    protected $distUserEntityClass;
 
     /**
      * LocalUserEventSubcriber constructor.
@@ -119,7 +119,7 @@ class LocalUserEventSubcriber implements EventSubscriberInterface
      * @param string $username
      * @param ServerInterface $server
      */
-    private function doRemove(string $username, ServerInterface $server)
+    protected function doRemove(string $username, ServerInterface $server)
     {
         $user = $this->localEntityManager->getRepository($this->localUserEntityClass)->findOneBy(['username' => $username, 'server' => $server]);
         if ($user instanceof LocalUserInterface) {

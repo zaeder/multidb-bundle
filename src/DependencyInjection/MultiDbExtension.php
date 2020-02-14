@@ -46,7 +46,7 @@ class MultiDbExtension extends Extension
         $phpLoader->import('*.php');
     }
 
-    private function formatLoginRedirect(array $loginRedirectParams) : array
+    protected function formatLoginRedirect(array $loginRedirectParams) : array
     {
         $loginRedirect = [];
         foreach ($loginRedirectParams as $loginRedirectParam) {

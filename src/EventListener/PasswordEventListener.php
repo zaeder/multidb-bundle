@@ -15,12 +15,12 @@ class PasswordEventListener
     /**
      * @var PasswordEncoder
      */
-    private $encoder;
+    protected $encoder;
 
     /**
      * @var array
      */
-    private $entitiesEnabled;
+    protected $entitiesEnabled;
 
     /**
      * PasswordEventListener constructor.
@@ -52,7 +52,7 @@ class PasswordEventListener
      * Encode dist user's password et server's password
      * @param LifecycleEventArgs $args
      */
-    private function encodePasswords(LifecycleEventArgs $args)
+    protected function encodePasswords(LifecycleEventArgs $args)
     {
         $entity = $args->getObject();
 
@@ -67,7 +67,7 @@ class PasswordEventListener
      * @param $entity
      * @return bool
      */
-    private function isEnabledEntity($entity) : bool
+    protected function isEnabledEntity($entity) : bool
     {
         foreach ($this->entitiesEnabled as $class) {
             if ($entity instanceof $class) {

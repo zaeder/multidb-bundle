@@ -11,12 +11,12 @@ use Zaeder\MultiDbBundle\Event\MultiDbEvent;
 
 trait DoctrineSchemaTrait
 {
-    private $managerRegistry;
-    private $localEntityManagerName;
-    private $localConnectionName;
-    private $distEntityManagerName;
-    private $serverEntityClass;
-    private $eventDispatcher;
+    protected $managerRegistry;
+    protected $localEntityManagerName;
+    protected $localConnectionName;
+    protected $distEntityManagerName;
+    protected $serverEntityClass;
+    protected $eventDispatcher;
 
     public function init(
         ManagerRegistry $managerRegistry,

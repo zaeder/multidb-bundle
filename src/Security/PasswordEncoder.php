@@ -20,11 +20,11 @@ class PasswordEncoder
     /**
      * @var string
      */
-    private $passworkKey;
+    protected $passworkKey;
     /**
      * @var string|null
      */
-    private $iv;
+    protected $iv;
 
     /**
      * PasswordEncoder constructor.
@@ -97,7 +97,7 @@ class PasswordEncoder
      * Get a random secret string
      * @return string
      */
-    private function getSecret() : string
+    protected function getSecret() : string
     {
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$*!;?&,:/.=+-%';
         return substr(str_shuffle($chars), 0, 20);

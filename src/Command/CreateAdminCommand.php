@@ -20,11 +20,11 @@ class CreateAdminCommand extends Command
     /**
      * @var EntityManagerInterface
      */
-    private $localEntityManager;
+    protected $localEntityManager;
     /**
      * @var PasswordEncoder
      */
-    private $encoder;
+    protected $encoder;
     /**
      * @var string
      */
