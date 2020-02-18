@@ -22,23 +22,23 @@ class MultiDbExtension extends Extension
         $container->setParameter('zaeder.multidb.local.connection.name', $config['local']['connection']);
         $container->setParameter('zaeder.multidb.local.entity_manager.name', $config['local']['entityManager']);
         $container->setParameter('zaeder.multidb.local.table_prefix', $config['local']['tablePrefix']);
-        $container->setParameter('zaeder.multidb.local.server_entity.class', $config['local']['serverEntity']);
-        $container->setParameter('zaeder.multidb.local.user_entity.class', $config['local']['userEntity']);
+        $container->setParameter('zaeder.multidb.local.server_repository.class', $config['local']['serverRepository']);
+        $container->setParameter('zaeder.multidb.local.user_repository.class', $config['local']['userRepository']);
         $container->setParameter('zaeder.multidb.dist.connection.name', $config['dist']['connection']);
         $container->setParameter('zaeder.multidb.dist.entity_manager.name', $config['dist']['entityManager']);
         $container->setParameter('zaeder.multidb.dist.table_prefix', $config['dist']['tablePrefix']);
-        $container->setParameter('zaeder.multidb.dist.user_entity.class', $config['dist']['userEntity']);
+        $container->setParameter('zaeder.multidb.dist.user_repository.class', $config['dist']['userRepository']);
         $container->setParameter('zaeder.multidb.password_key', $config['passwordKey']);
         $container->setParameter('zaeder.multidb.login_redirect', $this->formatLoginRedirect($config['loginRedirect']));
         $container->setParameter('zaeder.multidb.entities.enable.password_encode', $config['entities']['enablePasswordEncode']);
         $container->setParameter('zaeder.multidb.login_check_encoded_password', $config['loginCheckEncodedPassword']);
+        $container->setParameter('zaeder.multidb.login_route', $config['loginRoute']);
+        $container->setParameter('zaeder.multidb.login_fields.serverkey', $config['loginFields']['serverKey']);
+        $container->setParameter('zaeder.multidb.login_fields.username', $config['loginFields']['username']);
+        $container->setParameter('zaeder.multidb.login_fields.password', $config['loginFields']['password']);
+        $container->setParameter('zaeder.multidb.login_fields.csrf_token', $config['loginFields']['csrfToken']);
 
         $fileLocator = new FileLocator(__DIR__ . '/../Resources/config/services');
-        $yamlLoader = new YamlFileLoader(
-            $container,
-            $fileLocator
-        );
-        $yamlLoader->import('*.yaml');
         $phpLoader = new PhpFileLoader(
             $container,
             $fileLocator

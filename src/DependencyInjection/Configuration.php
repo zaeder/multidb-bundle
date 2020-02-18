@@ -50,10 +50,14 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->scalarNode('loginRoute')
+                    ->defaultValue('login')
+                ->end()
                 ->append($this->getEntitiesEnablePasswordEncode())
                 ->booleanNode('loginCheckEncodedPassword')
                     ->defaultValue(true)
                 ->end()
+            ->append($this->getloginFields())
             ->end()
         ->end();
 
@@ -88,11 +92,11 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('tablePrefix')
                     ->defaultNull()
                 ->end()
-                ->scalarNode('serverEntity')
+                ->scalarNode('serverRepository')
                     ->cannotBeEmpty()
                     ->isRequired()
                 ->end()
-                ->scalarNode('userEntity')
+                ->scalarNode('userRepository')
                     ->cannotBeEmpty()
                     ->isRequired()
                 ->end()
@@ -130,7 +134,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('tablePrefix')
                     ->defaultNull()
                 ->end()
-                ->scalarNode('userEntity')
+                ->scalarNode('userRepository')
                     ->cannotBeEmpty()
                     ->isRequired()
                 ->end()
@@ -158,7 +162,40 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->arrayNode('enablePasswordEncode')
                     ->prototype('scalar')->end()
-                    ->defaultValue([ServerInterface::class, DistUserInterface::class])
+                    ->defaultValue([])
+                ->end()
+            ->end();
+
+        return $rootNode;
+    }
+
+    public function getloginFields()
+    {
+        $treeBuilder = new TreeBuilder('loginFields');
+
+        if (method_exists($treeBuilder, 'getRootNode')) {
+            /** @var ArrayNodeDefinition $rootNode */
+            $rootNode = $treeBuilder->getRootNode();
+        } else {
+            // BC layer for symfony/config 4.1 and older
+            /** @var ArrayNodeDefinition $rootNode */
+            $rootNode = $treeBuilder->root('loginFields');
+        }
+
+        $rootNode
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->scalarNode('serverKey')
+                    ->defaultValue('serverKey')
+                ->end()
+                ->scalarNode('username')
+                    ->defaultValue('username')
+                ->end()
+                ->scalarNode('password')
+                    ->defaultValue('password')
+                ->end()
+                ->scalarNode('csrfToken')
+                    ->defaultValue('_csrf_token')
                 ->end()
             ->end();
 

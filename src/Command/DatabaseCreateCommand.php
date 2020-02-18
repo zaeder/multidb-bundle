@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Zaeder\MultiDbBundle\Repository\AbstractServerRepository;
 
 class DatabaseCreateCommand extends CreateCommand
 {
@@ -19,13 +20,13 @@ class DatabaseCreateCommand extends CreateCommand
         string $localEntityManagerName,
         string $localConnectionName,
         string $distEntityManagerName,
-        string $serverEntityClass,
+        AbstractServerRepository $serverRepository,
         EventDispatcherInterface $eventDispatcher,
         $name = null
     )
     {
         parent::__construct($name);
-        $this->init($managerRegistry, $localEntityManagerName, $localConnectionName, $distEntityManagerName, $serverEntityClass, $eventDispatcher);
+        $this->init($managerRegistry, $localEntityManagerName, $localConnectionName, $distEntityManagerName, $serverRepository, $eventDispatcher);
     }
 
     protected function configure()

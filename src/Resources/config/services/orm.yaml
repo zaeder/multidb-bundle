@@ -1,4 +1,0 @@
-services:
-  Zaeder\MultiDbBundle\ORM\QuoteStrategy:
-    autoconfigure: true
-    autowire: true

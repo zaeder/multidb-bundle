@@ -7,6 +7,8 @@ use Zaeder\MultiDbBundle\Entity\ServerInterface;
 use Zaeder\MultiDbBundle\Event\DatabaseEvents;
 use Zaeder\MultiDbBundle\Event\MultiDbEvent;
 use Zaeder\MultiDbBundle\Event\SecurityEvents;
+use Zaeder\MultiDbBundle\Repository\AbstractDistUserRepository;
+use Zaeder\MultiDbBundle\Repository\AbstractServerRepository;
 use Zaeder\MultiDbBundle\Security\PasswordEncoder;
 use Zaeder\MultiDbBundle\Security\Security;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,25 +35,17 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
     use TargetPathTrait;
 
     /**
-     * @var EntityManagerInterface
+     * @var AbstractDistUserRepository
      */
-    protected $localEntityManager;
+    protected $distUserRepository;
     /**
-     * @var EntityManagerInterface
+     * @var AbstractDistUserRepository
      */
-    protected $distEntityManager;
+    protected $localUserRepository;
     /**
-     * @var string
+     * @var AbstractServerRepository
      */
-    protected $distUserEntityClass;
-    /**
-     * @var string
-     */
-    protected $localUserEntityClass;
-    /**
-     * @var string
-     */
-    protected $serverEntityClass;
+    protected $serverRepository;
     /**
      * @var array
      */
@@ -77,46 +71,73 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
      * @var bool
      */
     protected $loginCheckEncodedPassword;
+    /**
+     * @var string
+     */
+    protected $loginRoute;
+    /**
+     * @var string
+     */
+    protected $serverKeyField;
+    /**
+     * @var string
+     */
+    protected $usernameField;
+    /**
+     * @var string
+     */
+    protected $passwordField;
+    /**
+     * @var string
+     */
+    protected $csrfTokenField;
 
     /**
      * LoginFormAuthenticator constructor.
-     * @param ManagerRegistry $registry
-     * @param string $localEntityManagerName
-     * @param string $distEntityManagerName
-     * @param string $distUserEntityClass
-     * @param string $serverEntityClass
-     * @param string $localUserEntityClass
+     * @param AbstractDistUserRepository $distUserRepository
+     * @param AbstractDistUserRepository $localUserRepository
+     * @param AbstractServerRepository $serverRepository
      * @param UrlGeneratorInterface $urlGenerator
      * @param CsrfTokenManagerInterface $csrfTokenManager
      * @param PasswordEncoder $passwordEncoder
      * @param EventDispatcherInterface $eventDispatcher
+     * @param string $loginRoute
+     * @param string $serverKeyField
+     * @param string $usernameField
+     * @param string $passwordField
+     * @param string $csrfTokenField
      */
     public function __construct(
-        ManagerRegistry $registry,
-        string $localEntityManagerName,
-        string $distEntityManagerName,
-        string $distUserEntityClass,
-        string $localUserEntityClass,
-        string $serverEntityClass,
+        AbstractDistUserRepository $distUserRepository,
+        AbstractDistUserRepository $localUserRepository,
+        AbstractServerRepository $serverRepository,
         array $loginRedirect,
         UrlGeneratorInterface $urlGenerator,
         CsrfTokenManagerInterface $csrfTokenManager,
         PasswordEncoder $passwordEncoder,
         EventDispatcherInterface $eventDispatcher,
-        bool $loginCheckEncodedPassword
+        bool $loginCheckEncodedPassword,
+        string $loginRoute,
+        string $serverKeyField,
+        string $usernameField,
+        string $passwordField,
+        string $csrfTokenField
     )
     {
-        $this->localEntityManager = $registry->getManager($localEntityManagerName);
-        $this->distEntityManager = $registry->getManager($distEntityManagerName);
-        $this->distUserEntityClass = $distUserEntityClass;
-        $this->localUserEntityClass = $localUserEntityClass;
-        $this->serverEntityClass = $serverEntityClass;
+        $this->distUserRepository = $distUserRepository;
+        $this->localUserRepository = $localUserRepository;
+        $this->serverRepository = $serverRepository;
         $this->loginRedirect = $loginRedirect;
         $this->urlGenerator = $urlGenerator;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->passwordEncoder = $passwordEncoder;
         $this->eventDispatcher = $eventDispatcher;
         $this->loginCheckEncodedPassword = $loginCheckEncodedPassword;
+        $this->loginRoute = $loginRoute;
+        $this->serverKeyField = $serverKeyField;
+        $this->usernameField = $usernameField;
+        $this->passwordField = $passwordField;
+        $this->csrfTokenField = $csrfTokenField;
     }
 
     /**
@@ -125,7 +146,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
      */
     public function supports(Request $request)
     {
-        return 'login' === $request->attributes->get('_route')
+        return $this->loginRoute === $request->attributes->get('_route')
             && $request->isMethod('POST');
     }
 
@@ -136,10 +157,10 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
     public function getCredentials(Request $request)
     {
         $credentials = [
-            'serverkey' => $request->request->get('serverkey'),
-            'username' => $request->request->get('username'),
-            'password' => $request->request->get('password'),
-            'csrf_token' => $request->request->get('_csrf_token'),
+            'serverkey' => $request->request->get($this->serverKeyField),
+            'username' => $request->request->get($this->usernameField),
+            'password' => $request->request->get($this->passwordField),
+            'csrf_token' => $request->request->get($this->csrfTokenField),
         ];
         $request->getSession()->set(
             Security::LAST_USERNAME,
@@ -166,15 +187,15 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         }
 
         if (!empty($credentials['serverkey'])) {
-            $server = $this->localEntityManager->getRepository($this->serverEntityClass)->findOneBy(['key' => $credentials['serverkey'], 'isActive' => true]);
+            $server = $this->serverRepository->findByServerKey($credentials['serverkey']);
 
-            if (!$server instanceof ServerInterface) {
+            if (!$server) {
                 throw new CustomUserMessageAuthenticationException('Server key could not be found.');
             }
 
             $this->eventDispatcher->dispatch(new MultiDbEvent($server), DatabaseEvents::DIST_EM_CONFIG);
 
-            $distUser = $this->distEntityManager->getRepository($this->distUserEntityClass)->findOneBy(['username' => $credentials['username'], 'isActive' => true]);
+            $distUser = $this->distUserRepository->findByUsername($credentials['username']);
 
             if (!$distUser) {
                 // fail authentication with a custom error
@@ -191,7 +212,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
             $this->eventDispatcher->dispatch(new MultiDbEvent($data), SecurityEvents::SECURITY_IMPORT_DIST_USER);
         }
 
-        $user = $this->localEntityManager->getRepository($this->localUserEntityClass)->findOneBy(['username' => $credentials['username']]);
+        $user = $this->localUserRepository->findByUsername($credentials['username']);
 
         if (!$user) {
             // fail authentication with a custom error
@@ -240,6 +261,6 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
      */
     protected function getLoginUrl()
     {
-        return $this->urlGenerator->generate('login');
+        return $this->urlGenerator->generate($this->loginRoute);
     }
 }

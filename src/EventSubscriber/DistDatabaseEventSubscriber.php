@@ -10,6 +10,8 @@ use Zaeder\MultiDbBundle\Entity\ServerInterface;
 use Zaeder\MultiDbBundle\Event\DatabaseEvents;
 use Zaeder\MultiDbBundle\Event\MultiDbEvent;
 use Zaeder\MultiDbBundle\Event\SecurityEvents;
+use Zaeder\MultiDbBundle\Repository\AbstractServerRepository;
+use Zaeder\MultiDbBundle\Repository\AbstractLocalUserRepository;
 use Zaeder\MultiDbBundle\Security\PasswordEncoder;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -44,9 +46,13 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
      */
     protected $distEntityManagerName;
     /**
-     * @var string
+     * @var AbstractLocalUserRepository
      */
-    protected $localUserEntityClass;
+    protected $localUserRepository;
+    /**
+     * @var AbstractServerRepository
+     */
+    protected $localServerRepository;
     /**
      * @var PasswordEncoder
      */
@@ -67,43 +73,48 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
      * @var RouterInterface
      */
     protected $router;
+    /**
+     * @var string
+     */
+    protected $loginRoute;
 
     /**
      * DistDatabaseEventSubscriber constructor.
      * @param ManagerRegistry $registry
-     * @param string $localEntityManagerName
      * @param string $distConnectionName
      * @param string $distEntityManagerName
-     * @param string $localUserEntityClass
+     * @param AbstractLocalUserRepository $localUserRepository
+     * @param AbstractServerRepository $localServerRepository
      * @param PasswordEncoder $encoder
      * @param TokenStorageInterface $tokenStorage
      * @param EventDispatcherInterface $eventDispatcher
      * @param SessionInterface $session
      * @param RouterInterface $router
+     * @param string $loginRoute
      */
     public function __construct(
         ManagerRegistry $registry,
-        string $localEntityManagerName,
         string $distConnectionName,
         string $distEntityManagerName,
-        string $localUserEntityClass,
+        AbstractLocalUserRepository $localUserRepository,
         PasswordEncoder $encoder,
         TokenStorageInterface $tokenStorage,
         EventDispatcherInterface $eventDispatcher,
         SessionInterface $session,
-        RouterInterface $router
+        RouterInterface $router,
+        string $loginRoute
     )
     {
         $this->registry = $registry;
-        $this->localEntityManagerName = $localEntityManagerName;
         $this->distConnectionName = $distConnectionName;
         $this->distEntityManagerName = $distEntityManagerName;
-        $this->localUserEntityClass = $localUserEntityClass;
+        $this->localUserRepository = $localUserRepository;
         $this->encoder = $encoder;
         $this->tokenStorage = $tokenStorage;
         $this->eventDispatcher = $eventDispatcher;
         $this->session = $session;
         $this->router = $router;
+        $this->loginRoute = $loginRoute;
     }
 
     /**
@@ -152,11 +163,11 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
                     // Check user validity
                     $this->eventDispatcher->dispatch(new MultiDbEvent($user), SecurityEvents::SECURITY_VALIDATE_DIST_USER);
                     // Check if current user exists after check up; if no kill session and redirect to login page
-                    $user = $this->registry->getManager($this->localEntityManagerName)->getRepository($this->localUserEntityClass)->findOneBy(['username' => $username, 'server' => $server]);
+                    $user = $this->localUserRepository->findByUsernameAndServer($username, $server);
                     if (!$user instanceof LocalUserInterface) {
                         $this->tokenStorage->setToken(null);
                         $this->session->invalidate();
-                        header('location:'.$this->router->generate('login'));
+                        header('location:'.$this->router->generate($this->loginRoute));
                         die;
                     }
                 }

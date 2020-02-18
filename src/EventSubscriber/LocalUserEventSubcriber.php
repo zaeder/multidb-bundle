@@ -10,6 +10,8 @@ use Zaeder\MultiDbBundle\Event\MultiDbEvent;
 use Zaeder\MultiDbBundle\Event\SecurityEvents;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Zaeder\MultiDbBundle\Repository\AbstractDistUserRepository;
+use Zaeder\MultiDbBundle\Repository\AbstractLocalUserRepository;
 
 /**
  * Class LocalUserEventSubcriber
@@ -18,42 +20,26 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class LocalUserEventSubcriber implements EventSubscriberInterface
 {
     /**
-     * @var EntityManagerInterface
+     * @var AbstractLocalUserRepository
      */
-    protected $localEntityManager;
+    protected $localUserRepository;
     /**
-     * @var EntityManagerInterface
+     * @var AbstractDistUserRepository
      */
-    protected $distEntityManager;
-    /**
-     * @var string
-     */
-    protected $localUserEntityClass;
-    /**
-     * @var string
-     */
-    protected $distUserEntityClass;
+    protected $distUserRepository;
 
     /**
      * LocalUserEventSubcriber constructor.
-     * @param ManagerRegistry $registry
-     * @param string $localEntityManagerName
-     * @param string $distEntityManagerName
-     * @param string $localUserEntityClass
-     * @param string $distUserEntityClass
+     * @param AbstractLocalUserRepository $localUserRepository
+     * @param AbstractDistUserRepository $distUserRepository
      */
     public function __construct(
-        ManagerRegistry $registry,
-        string $localEntityManagerName,
-        string $distEntityManagerName,
-        string $localUserEntityClass,
-        string $distUserEntityClass
+        AbstractLocalUserRepository $localUserRepository,
+        AbstractDistUserRepository $distUserRepository
     )
     {
-        $this->localEntityManager = $registry->getManager($localEntityManagerName);
-        $this->distEntityManager = $registry->getManager($distEntityManagerName);
-        $this->localUserEntityClass = $localUserEntityClass;
-        $this->distUserEntityClass= $distUserEntityClass;
+        $this->localUserRepository = $localUserRepository;
+        $this->distUserRepository= $distUserRepository;
     }
 
     /**
@@ -77,11 +63,11 @@ class LocalUserEventSubcriber implements EventSubscriberInterface
     public function import(MultiDbEvent $event)
     {
         $data = $event->getData();
-        if ($data instanceof \stdClass && isset($data->user) && $data->user instanceof DistUserInterface && isset($data->server) && $data->server instanceof Server) {
+        if ($data instanceof \stdClass && isset($data->user) && $data->user instanceof DistUserInterface && isset($data->server) && $data->server instanceof ServerInterface) {
             // First remove user if exists in local database
             $this->doRemove($data->user->getUsername(), $data->server);
             // Import dist user in local database
-            $this->localEntityManager->getRepository($this->localUserEntityClass)->add($data->user, $data->server);
+            $this->localUserRepository->add($data->user, $data->server);
         }
     }
 
@@ -93,11 +79,12 @@ class LocalUserEventSubcriber implements EventSubscriberInterface
     {
         $data = $event->getData();
         if ($data instanceof LocalUserInterface) {
-            $distUser = $this->distEntityManager->getRepository($this->distUserEntityClass)->findOneBy(['username' => $data->getUsername(), 'isActive' => true]);
+            $distUser = $this->distUserRepository->findByUsername($data->getUsername());
             // Remove local user if not exists in dist database
             if (!$distUser instanceof DistUserInterface) {
-                $this->localEntityManager->remove($data);
-                $this->localEntityManager->flush();
+                $localEntityManager = $this->localUserRepository->getEntityManager();
+                $localEntityManager->remove($data);
+                $localEntityManager->flush();
             }
         }
     }
@@ -121,10 +108,11 @@ class LocalUserEventSubcriber implements EventSubscriberInterface
      */
     protected function doRemove(string $username, ServerInterface $server)
     {
-        $user = $this->localEntityManager->getRepository($this->localUserEntityClass)->findOneBy(['username' => $username, 'server' => $server]);
+        $user = $this->localUserRepository->findByUsernameAndServer($username, $server);
         if ($user instanceof LocalUserInterface) {
-            $this->localEntityManager->remove($user);
-            $this->localEntityManager->flush();
+            $localEntityManager = $this->localUserRepository->getEntityManager();
+            $localEntityManager->remove($user);
+            $localEntityManager->flush();
         }
     }
 }

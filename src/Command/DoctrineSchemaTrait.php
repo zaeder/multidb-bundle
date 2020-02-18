@@ -8,14 +8,33 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Zaeder\MultiDbBundle\Entity\ServerInterface;
 use Zaeder\MultiDbBundle\Event\DatabaseEvents;
 use Zaeder\MultiDbBundle\Event\MultiDbEvent;
+use Zaeder\MultiDbBundle\Repository\AbstractServerRepository;
 
 trait DoctrineSchemaTrait
 {
+    /**
+     * @var ManagerRegistry
+     */
     protected $managerRegistry;
+    /**
+     * @var string
+     */
     protected $localEntityManagerName;
+    /**
+     * @var string
+     */
     protected $localConnectionName;
+    /**
+     * @var string
+     */
     protected $distEntityManagerName;
-    protected $serverEntityClass;
+    /**
+     * @var AbstractServerRepository
+     */
+    protected $serverRepository;
+    /**
+     * @var EventDispatcherInterface
+     */
     protected $eventDispatcher;
 
     public function init(
@@ -23,7 +42,7 @@ trait DoctrineSchemaTrait
         string $localEntityManagerName,
         string $localConnectionName,
         string $distEntityManagerName,
-        string $serverEntityClass,
+        AbstractServerRepository $serverRepository,
         EventDispatcherInterface $eventDispatcher
     )
     {
@@ -31,7 +50,7 @@ trait DoctrineSchemaTrait
         $this->localEntityManagerName = $localEntityManagerName;
         $this->localConnectionName = $localConnectionName;
         $this->distEntityManagerName = $distEntityManagerName;
-        $this->serverEntityClass = $serverEntityClass;
+        $this->serverRepository = $serverRepository;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -44,7 +63,7 @@ trait DoctrineSchemaTrait
             if ($conn instanceof \Doctrine\DBAL\Connection) {
                 $conn->connect();
             }
-            $server = $em->getRepository($this->serverEntityClass)->findOneBy(['key' => $serverKey, 'isActive' => true]);
+            $server = $this->serverRepository->findByServerKey($serverKey);
             if (!$server instanceof ServerInterface) {
                 throw new \Exception('Server can not be found');
             }
