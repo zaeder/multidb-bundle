@@ -8,6 +8,7 @@ use Zaeder\MultiDbBundle\Event\DatabaseEvents;
 use Zaeder\MultiDbBundle\Event\MultiDbEvent;
 use Zaeder\MultiDbBundle\Event\SecurityEvents;
 use Zaeder\MultiDbBundle\Repository\AbstractDistUserRepository;
+use Zaeder\MultiDbBundle\Repository\AbstractLocalUserRepository;
 use Zaeder\MultiDbBundle\Repository\AbstractServerRepository;
 use Zaeder\MultiDbBundle\Security\PasswordEncoder;
 use Zaeder\MultiDbBundle\Security\Security;
@@ -39,7 +40,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
      */
     protected $distUserRepository;
     /**
-     * @var AbstractDistUserRepository
+     * @var AbstractLocalUserRepository
      */
     protected $localUserRepository;
     /**
@@ -95,7 +96,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
     /**
      * LoginFormAuthenticator constructor.
      * @param AbstractDistUserRepository $distUserRepository
-     * @param AbstractDistUserRepository $localUserRepository
+     * @param AbstractLocalUserRepository $localUserRepository
      * @param AbstractServerRepository $serverRepository
      * @param UrlGeneratorInterface $urlGenerator
      * @param CsrfTokenManagerInterface $csrfTokenManager
@@ -109,7 +110,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
      */
     public function __construct(
         AbstractDistUserRepository $distUserRepository,
-        AbstractDistUserRepository $localUserRepository,
+        AbstractLocalUserRepository $localUserRepository,
         AbstractServerRepository $serverRepository,
         array $loginRedirect,
         UrlGeneratorInterface $urlGenerator,
