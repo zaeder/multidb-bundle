@@ -4,16 +4,16 @@ namespace Zaeder\MultiDbBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository as DoctrineServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
-use Doctrine\ORM\Mapping\ClassMetadata;
 
 class ServiceEntityRepository extends DoctrineServiceEntityRepository
 {
     /**
      * @param ManagerRegistry $managerRegistry
+     * @param string $className
      */
-    public function __construct(ManagerRegistry $managerRegistry, ClassMetadata $class)
+    public function __construct(ManagerRegistry $managerRegistry, string $className)
     {
-        parent::__construct($managerRegistry, $class);
+        parent::__construct($managerRegistry, $className);
     }
 
     public function getNewEntity()
