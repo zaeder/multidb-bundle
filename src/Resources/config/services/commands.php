@@ -11,8 +11,8 @@ if ($container instanceof Symfony\Component\DependencyInjection\Compiler\MergeEx
     $distEntityManagerName = $container->getParameter('zaeder.multidb.dist.entity_manager.name');
     $serverRepositoryClass = $container->getParameter('zaeder.multidb.local.server_repository.class');
 
-    $loginFormAuthenticatorDefinition = new Definition(DatabaseCreateCommand::class);
-    $loginFormAuthenticatorDefinition
+    $databaseCreateCommandDefinition = new Definition(DatabaseCreateCommand::class);
+    $databaseCreateCommandDefinition
         ->setAutowired(true)
         ->setAutoconfigured(true)
         ->setArgument('$localEntityManagerName', $localEntityManagerName)
@@ -21,10 +21,10 @@ if ($container instanceof Symfony\Component\DependencyInjection\Compiler\MergeEx
         ->setArgument('$serverRepository', $serverRepositoryClass)
         ->addTag('console.command')
     ;
-    $container->setDefinition(DatabaseCreateCommand::class, $loginFormAuthenticatorDefinition);
+    $container->setDefinition(DatabaseCreateCommand::class, $databaseCreateCommandDefinition);
 
-    $loginFormAuthenticatorDefinition = new Definition(DatabaseDropCommand::class);
-    $loginFormAuthenticatorDefinition
+    $databaseDropCommandDefinition = new Definition(DatabaseDropCommand::class);
+    $databaseDropCommandDefinition
         ->setAutowired(true)
         ->setAutoconfigured(true)
         ->setArgument('$localEntityManagerName', $localEntityManagerName)
@@ -33,10 +33,10 @@ if ($container instanceof Symfony\Component\DependencyInjection\Compiler\MergeEx
         ->setArgument('$serverRepository', $serverRepositoryClass)
         ->addTag('console.command')
     ;
-    $container->setDefinition(DatabaseDropCommand::class, $loginFormAuthenticatorDefinition);
+    $container->setDefinition(DatabaseDropCommand::class, $databaseDropCommandDefinition);
 
-    $loginFormAuthenticatorDefinition = new Definition(DatabaseUpdateCommand::class);
-    $loginFormAuthenticatorDefinition
+    $databaseUpdateCommandDefinition = new Definition(DatabaseUpdateCommand::class);
+    $databaseUpdateCommandDefinition
         ->setAutowired(true)
         ->setAutoconfigured(true)
         ->setArgument('$localEntityManagerName', $localEntityManagerName)
@@ -45,5 +45,5 @@ if ($container instanceof Symfony\Component\DependencyInjection\Compiler\MergeEx
         ->setArgument('$serverRepository', $serverRepositoryClass)
         ->addTag('console.command')
     ;
-    $container->setDefinition(DatabaseUpdateCommand::class, $loginFormAuthenticatorDefinition);
+    $container->setDefinition(DatabaseUpdateCommand::class, $databaseUpdateCommandDefinition);
 }

@@ -1,16 +1,18 @@
 <?php
 
 use Symfony\Component\DependencyInjection\Definition;
+use Zaeder\MultiDbBundle\Security\Authentication\AuthenticationUtils;
 use Zaeder\MultiDbBundle\Security\Authentication\LoginFormAuthenticator;
 use Zaeder\MultiDbBundle\Security\PasswordEncoder;
+use Zaeder\MultiDbBundle\Security\Security;
 
 if ($container instanceof Symfony\Component\DependencyInjection\Compiler\MergeExtensionConfigurationContainerBuilder) {
-    $securtiryDefinition = new Definition('Zaeder\\MultiDbBundle\\Security\\');
-    $securtiryDefinition
+    $authenticationUtilsDefinition = new Definition(AuthenticationUtils::class);
+    $authenticationUtilsDefinition
         ->setAutowired(true)
         ->setAutoconfigured(true)
     ;
-    $container->setDefinition('Zaeder\\MultiDbBundle\\Security\\', $securtiryDefinition);
+    $container->setDefinition(AuthenticationUtils::class, $authenticationUtilsDefinition);
 
     $loginFormAuthenticatorDefinition = new Definition(LoginFormAuthenticator::class);
     $loginFormAuthenticatorDefinition
@@ -36,4 +38,11 @@ if ($container instanceof Symfony\Component\DependencyInjection\Compiler\MergeEx
         ->setArgument('$passwordKey', $container->getParameter('zaeder.multidb.password_key'))
     ;
     $container->setDefinition(PasswordEncoder::class, $passwordEncoderDefinition);
+
+    $securityDefinition = new Definition(Security::class);
+    $securityDefinition
+        ->setAutowired(true)
+        ->setAutoconfigured(true)
+    ;
+    $container->setDefinition(Security::class, $securityDefinition);
 }
