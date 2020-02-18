@@ -1,6 +1,7 @@
 <?php
 
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 use Zaeder\MultiDbBundle\Security\Authentication\AuthenticationUtils;
 use Zaeder\MultiDbBundle\Security\Authentication\LoginFormAuthenticator;
 use Zaeder\MultiDbBundle\Security\PasswordEncoder;
@@ -18,9 +19,9 @@ if ($container instanceof Symfony\Component\DependencyInjection\Compiler\MergeEx
     $loginFormAuthenticatorDefinition
         ->setAutowired(true)
         ->setAutoconfigured(true)
-        ->setArgument('$distUserRepository', $container->getParameter('zaeder.multidb.dist.user_repository.class'))
-        ->setArgument('$localUserRepository', $container->getParameter('zaeder.multidb.local.user_repository.class'))
-        ->setArgument('$serverRepository', $container->getParameter('zaeder.multidb.local.server_repository.class'))
+        ->setArgument('$distUserRepository', new Reference($container->getParameter('zaeder.multidb.dist.user_repository.class')))
+        ->setArgument('$localUserRepository', new Reference($container->getParameter('zaeder.multidb.local.user_repository.class')))
+        ->setArgument('$serverRepository',new Reference($container->getParameter('zaeder.multidb.local.server_repository.class')))
         ->setArgument('$loginRedirect', $container->getParameter('zaeder.multidb.login_redirect'))
         ->setArgument('$loginCheckEncodedPassword', $container->getParameter('zaeder.multidb.login_check_encoded_password'))
         ->setArgument('$loginRoute', $container->getParameter('zaeder.multidb.login_route'))

@@ -1,6 +1,7 @@
 <?php
 
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 use Zaeder\MultiDbBundle\EventListener\PasswordEventListener;
 use Zaeder\MultiDbBundle\EventSubscriber\DistDatabaseEventSubscriber;
 use Zaeder\MultiDbBundle\EventSubscriber\LocalUserEventSubcriber;
@@ -10,11 +11,11 @@ if ($container instanceof Symfony\Component\DependencyInjection\Compiler\MergeEx
     $localTablePrefix = $container->getParameter('zaeder.multidb.local.table_prefix');
     $localConnectionName = $container->getParameter('zaeder.multidb.local.connection.name');
     $localEntityManagerName = $container->getParameter('zaeder.multidb.local.entity_manager.name');
-    $localUserRepository = $container->getParameter('zaeder.multidb.local.user_repository.class');
+    $localUserRepository = new Reference($container->getParameter('zaeder.multidb.local.user_repository.class'));
     $distTablePrefix = $container->getParameter('zaeder.multidb.dist.table_prefix');
     $distConnectionName = $container->getParameter('zaeder.multidb.dist.connection.name');
     $distEntityManagerName = $container->getParameter('zaeder.multidb.dist.entity_manager.name');
-    $distUserRepository = $container->getParameter('zaeder.multidb.dist.user_repository.class');
+    $distUserRepository = new Reference($container->getParameter('zaeder.multidb.dist.user_repository.class'));
     $entitiesEnabled = $container->getParameter('zaeder.multidb.entities.enable.password_encode');
     $loginRoute = $container->getParameter('zaeder.multidb.login_route');
 
@@ -32,7 +33,6 @@ if ($container instanceof Symfony\Component\DependencyInjection\Compiler\MergeEx
     $distDatabaseEventSubscriberDefinition
         ->setAutowired(true)
         ->setAutoconfigured(true)
-        ->setArgument('$localEntityManagerName', $localEntityManagerName)
         ->setArgument('$distConnectionName', $distConnectionName)
         ->setArgument('$distEntityManagerName', $distEntityManagerName)
         ->setArgument('$localUserRepository', $localUserRepository)
