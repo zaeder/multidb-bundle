@@ -82,9 +82,7 @@ class LocalUserEventSubcriber implements EventSubscriberInterface
             $distUser = $this->distUserRepository->findByUsername($data->getUsername());
             // Remove local user if not exists in dist database
             if (!$distUser instanceof DistUserInterface) {
-                $localEntityManager = $this->localUserRepository->getEntityManager();
-                $localEntityManager->remove($data);
-                $localEntityManager->flush();
+                $this->localUserRepository->remove($data);
             }
         }
     }
@@ -110,9 +108,7 @@ class LocalUserEventSubcriber implements EventSubscriberInterface
     {
         $user = $this->localUserRepository->findByUsernameAndServer($username, $server);
         if ($user instanceof LocalUserInterface) {
-            $localEntityManager = $this->localUserRepository->getEntityManager();
-            $localEntityManager->remove($user);
-            $localEntityManager->flush();
+            $this->localUserRepository->remove($user);
         }
     }
 }
