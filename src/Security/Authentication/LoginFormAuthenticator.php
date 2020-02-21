@@ -187,6 +187,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
             throw new InvalidCsrfTokenException();
         }
 
+        $server = null;
         if (!empty($credentials['serverkey'])) {
             $server = $this->serverRepository->findByServerKey($credentials['serverkey']);
 
@@ -213,7 +214,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
             $this->eventDispatcher->dispatch(new MultiDbEvent($data), SecurityEvents::SECURITY_IMPORT_DIST_USER);
         }
 
-        $user = $this->localUserRepository->findByUsername($credentials['username']);
+        $user = $this->localUserRepository->findByUsernameAndServer($credentials['username'], $server);
 
         if (!$user) {
             // fail authentication with a custom error

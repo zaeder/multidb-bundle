@@ -30,7 +30,7 @@ interface ServerInterface
         'SQLSRV' => self::DRIVER_PDO_SQLSRV,
         '4D' => self::DRIVER_PDO_4D,
     ];
-    
+
     public function getId();
     public function getKey();
     public function setKey(string $key);

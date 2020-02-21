@@ -186,7 +186,7 @@ class Configuration implements ConfigurationInterface
             ->addDefaultsIfNotSet()
             ->children()
                 ->scalarNode('serverKey')
-                    ->defaultValue('serverKey')
+                    ->defaultValue('serverkey')
                 ->end()
                 ->scalarNode('username')
                     ->defaultValue('username')
