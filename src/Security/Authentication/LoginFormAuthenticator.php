@@ -17,6 +17,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Authentication\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
@@ -92,6 +93,10 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
      * @var string
      */
     protected $csrfTokenField;
+    /**
+     * @var AuthorizationCheckerInterface
+     */
+    protected $authorizationChecker;
 
     /**
      * LoginFormAuthenticator constructor.
@@ -122,7 +127,8 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         string $serverKeyField,
         string $usernameField,
         string $passwordField,
-        string $csrfTokenField
+        string $csrfTokenField,
+        AuthorizationCheckerInterface $authorizationChecker
     )
     {
         $this->distUserRepository = $distUserRepository;
@@ -139,6 +145,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         $this->usernameField = $usernameField;
         $this->passwordField = $passwordField;
         $this->csrfTokenField = $csrfTokenField;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     /**
@@ -248,9 +255,8 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
-        $userRoles = $token->getUser()->getRoles();
         foreach ($this->loginRedirect as $role => $route) {
-            if (in_array($role, $userRoles)) {
+            if ($this->authorizationChecker->isGranted($role)) {
                 return new RedirectResponse($this->urlGenerator->generate($route));
             }
         }
