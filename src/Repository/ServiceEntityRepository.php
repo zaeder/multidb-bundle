@@ -4,11 +4,17 @@ namespace Zaeder\MultiDbBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository as DoctrineServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
 use Zaeder\MultiDbBundle\Exception\EntityIdentifierException;
 use Zaeder\MultiDbBundle\Exception\EntityViolationException;
 
 class ServiceEntityRepository extends DoctrineServiceEntityRepository
 {
+    /**
+     * @var Connection|null
+     */
+    protected $_conn;
     /**
      * @param ManagerRegistry $managerRegistry
      * @param string $className
@@ -16,6 +22,10 @@ class ServiceEntityRepository extends DoctrineServiceEntityRepository
     public function __construct(ManagerRegistry $managerRegistry, string $className)
     {
         parent::__construct($managerRegistry, $className);
+
+        if ($this->_em instanceof EntityManagerInterface) {
+            $this->_conn = $this->_em->getConnection();
+        }
     }
 
     public function getNewEntity()
@@ -55,5 +65,10 @@ class ServiceEntityRepository extends DoctrineServiceEntityRepository
             return $entity->$getter();
         }
         throw new EntityIdentifierException('Can\'t find identifier for entity "'.$this->_entityName.'"');
+    }
+
+    protected function getConnection() : ?Connection
+    {
+        return $this->_conn;
     }
 }
