@@ -200,6 +200,7 @@ class DistDatabaseEventSubscriber implements EventSubscriberInterface
         $params['user'] = $server->getUsername();
         $params['password'] = $this->encoder->decode($server->getPassword(), $server->getSalt());
         $params['host'] = $server->getHost();
+        $params['port'] = $server->getPort();
 
         $refParams->setAccessible('protected');
         $refParams->setValue($connection, $params);

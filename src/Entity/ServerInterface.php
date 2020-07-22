@@ -46,6 +46,8 @@ interface ServerInterface
     public function setPassword(string $password);
     public function getSalt();
     public function setSalt(string $salt);
+    public function getDriver();
+    public function setDriver(string $driver);
     public function getIsActive();
     public function setIsActive(bool $isActive);
 }
